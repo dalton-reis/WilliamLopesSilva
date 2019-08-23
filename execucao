@@ -171,73 +171,66 @@ def funcMostrarTodos(conecta):
 def funcSimulacao(conecta):
     en = pyttsx.init()
     en.setProperty('voice', b'brazil')
-    en.setProperty('rate', 200)
-    raio = 0.07
-    resultados = 0
-    idCount = 1
+    en.setProperty('rate', 150)
+    raio = 0.7
     cursor = conecta.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM posicao_atual")
-    resultadoCount = cursor.fetchone()[0]
+    cursor.execute("SELECT * FROM posicao_atual ORDER BY id DESC LIMIT 1")
+    resultadoCount = cursor.fetchall()
+    for dadosTeste in resultadoCount:
+        lat = dadosTeste[1]
+        lng = dadosTeste[2]
+        direcao = dadosTeste[3]
 
-    while idCount <= resultadoCount:
-        cursor.execute("SELECT * FROM posicao_atual WHERE id='" + str(idCount)+"'")
-        resultadosPosicaoAtual = cursor.fetchall()
-        for dadosP in resultadosPosicaoAtual:
-            lat = dadosP[1]
-            lng = dadosP[2]
+    print "\n\nPosição atual: Latitude " + str(lat) + " Logitude " + str(lng) + " Direcao " + str(direcao)
 
-        print "\n\nPosição atual: Latitude " + str(lat) + " Logitude " + str(lng)
+    pointA = lat, lng
+    direcaoA = direcao
+    print "\n\nBuscando pontos de interesse no raio de " + str(raio * 1000) + " metros.\n"
 
-        pointA = lat, lng
-        print "\n\nBuscando pontos de interesse no raio de " + str(raio * 1000) + " metros.\n"
+    sql = ("SELECT *, (6371 * acos(cos(radians(" + str(lat) + ")) * cos(radians(lat)) * cos(radians(" + str(
+        lng) + ")- radians(lng)) + sin(radians(" + str(
+        lat) + ")) * sin(radians(lat))))AS distance FROM coordenada HAVING distance <= " + str(raio) + "")
 
-        sql = ("SELECT *, (6371 * acos(cos(radians(" + str(lat) + ")) * cos(radians(lat)) * cos(radians(" + str(
-            lng) + ")- radians(lng)) + sin(radians(" + str(
-            lat) + ")) * sin(radians(lat))))AS distance FROM coordenada HAVING distance <= " + str(raio) + "")
+    try:
+        cursor.execute(sql)
+        resultado = cursor.fetchall()
+        if not resultado:
+            print("Nenhum ponto de interesse no raio de "+ str(raio * 1000) + " metros.\n")
+            time.sleep(3)
 
-        try:
-            cursor.execute(sql)
-            resultado = cursor.fetchall()
-            if not resultado:
-                print("Nenhum ponto de interesse no raio de "+ str(raio * 1000) + " metros.\n")
-                time.sleep(3)
+        for dados in resultado:
+            ide = dados[0]
+            lat = dados[1]
+            lng = dados[2]
+            ponto_interesse = dados[3]
+            distance = round(dados[4], 4)
+            distMetros = str(int(distance * 1000))
+            pointB = lat,lng
+            opcao = calculate_initial_compass_bearing(pointA, pointB, direcaoA)
+            if distance >= 0.0005 and distance <= raio:
+                if opcao >= 0.0 and opcao <= 90.0:
+                    direcao = "direita a frente"
 
-            for dados in resultado:
-                ide = dados[0]
-                lat = dados[1]
-                lng = dados[2]
-                ponto_interesse = dados[3]
-                distance = round(dados[4], 4)
-                distMetros = str(int(distance * 1000))
-                pointB = lat,lng
-                opcao = calculate_initial_compass_bearing(pointA, pointB)
-                if distance >= 0.0005 and distance <= raio:
-                    if opcao >= 0.0 and opcao <= 90.0:
-                        direcao = "direita a frente"
+                elif opcao  >= 91.0 and opcao <= 180.0:
+                    direcao = "direita a tras"
 
-                    elif opcao  >= 91.0 and opcao <= 180.0:
-                        direcao = "direita atras"
+                elif opcao >= 181.0 and opcao <= 270.0:
+                    direcao = "esquerda a tras"
 
-                    elif opcao >= 181.0 and opcao <= 270.0:
-                        direcao = "esquerda a tras"
+                elif opcao >=  271.0 and opcao <= 360.0:
+                    direcao = "esquerda a frente"
 
-                    elif opcao >=  271.0 and opcao <= 360.0:
-                        direcao = "esquerda a frente"
+                en.say(ponto_interesse + " a " + distMetros + " metros " + direcao)
+                en.runAndWait()
+                print"------------------------------"
+                print " ID: %s\n Latitude: %s\n Longitude: %s\n Ponto de Interesse: %s\n Distancia: %s" % (
+                        ide, lat, lng, ponto_interesse, distMetros + " metros " + direcao)
+        conecta.commit()
 
-                    en.say(ponto_interesse + " a " + distMetros + " metros " + direcao)
-                    en.runAndWait()
-                    print"------------------------------"
-                    print " ID: %s\n Latitude: %s\n Longitude: %s\n Ponto de Interesse: %s\n Distancia: %s" % (
-                            ide, lat, lng, ponto_interesse, distMetros + " metros " + direcao)
-            conecta.commit()
-
-        except pymysql.Error, e:
-            print "Erro: " + sql
-            print e
-
-
-        idCount+=1
+    except pymysql.Error, e:
+        print "Erro: " + sql
+        print e
 
     conecta.close
     menu = raw_input()
@@ -287,7 +280,7 @@ def funcCoordenada(conecta):
     menu = raw_input()
     opcaoUsuario()
 
-def calculate_initial_compass_bearing(pointA, pointB):
+def calculate_initial_compass_bearing(pointA, pointB, direcaoA):
 
     if (type(pointA) != tuple) or (type(pointB) != tuple):
         raise TypeError("Only tuples are supported as arguments")
@@ -304,9 +297,14 @@ def calculate_initial_compass_bearing(pointA, pointB):
     initial_bearing = math.atan2(x, y)
 
     initial_bearing = math.degrees(initial_bearing)
-    compass_bearing = (initial_bearing + 360) % 360
+    compass_bearing = (initial_bearing + direcaoA) % direcaoA
 
     return compass_bearing
+
+def posicaoDirecaoAtual():
+
+
+    return ""
 
 # =========================================================================================================================
 def opcaoUsuario():

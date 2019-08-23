@@ -11,4 +11,5 @@ CREATE TABLE posicao_atual(
 id INT(6) AUTO_INCREMENT,
 lat DECIMAL(10, 8) NOT NULL,
 lng DECIMAL(11, 8) NOT NULL,
+direcao INT(3) NOT NULL,
 PRIMARY KEY (id));
