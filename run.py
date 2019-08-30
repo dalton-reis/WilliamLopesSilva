@@ -13,7 +13,7 @@
 
 from database import conectaBanco
 from tts import textToSpeech
-from actions import buscaUltimaPosicao
+from actions import buscaUltimaPosicao, distanciaDirecao
 import time
 
 def main():
@@ -22,7 +22,8 @@ def main():
         sinalGPS()
 
         while True:
-            posicao = buscaUltimaPosicao()
+            # posicao = buscaUltimaPosicao()
+            gpsCompass = distanciaDirecao()
             print("teste")
 
 

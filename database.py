@@ -29,11 +29,11 @@ def conectaBanco():
         conecta = pymysql.connect(HOST, USER, PASSWD)
         conecta.select_db(BANCO)
         print "Banco conectado"
-        br.say("Banco conectado")
-        br.runAndWait()
+        # br.say("Banco conectado")
+        # br.runAndWait()
     except :
         print "Erro: O banco especificado nao foi encontrado"
-        br.say("Erro O banco especificado nao foi encontrado")
-        br.runAndWait()
+        # br.say("Erro O banco especificado nao foi encontrado")
+        # br.runAndWait()
 
     return conecta

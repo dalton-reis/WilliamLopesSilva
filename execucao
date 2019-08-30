@@ -16,7 +16,6 @@ import sys
 import pymysql
 import pyttsx
 import math
-import decimal
 # =========================================================================================================================
 def conectaBanco():
     HOST = "localhost"
@@ -172,7 +171,7 @@ def funcSimulacao(conecta):
     en = pyttsx.init()
     en.setProperty('voice', b'brazil')
     en.setProperty('rate', 150)
-    raio = 0.7
+    raio = 0.02
     cursor = conecta.cursor()
 
     cursor.execute("SELECT * FROM posicao_atual ORDER BY id DESC LIMIT 1")
@@ -300,11 +299,6 @@ def calculate_initial_compass_bearing(pointA, pointB, direcaoA):
     compass_bearing = (initial_bearing + direcaoA) % direcaoA
 
     return compass_bearing
-
-def posicaoDirecaoAtual():
-
-
-    return ""
 
 # =========================================================================================================================
 def opcaoUsuario():
