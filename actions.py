@@ -15,12 +15,12 @@
 # Classe responsavel pelas ações
 # do sistema
 
-from database import conectaBanco
+from database import conectDatabase
 from tts import textToSpeech
 
 
 def buscaUltimaPosicao():
-    cursor = conectaBanco().cursor()
+    cursor = conectDatabase().cursor()
     cursor.execute("SELECT * FROM posicao_atual ORDER BY id DESC LIMIT 1")
     resultado = cursor.fetchone()
     cursor.close()
@@ -30,7 +30,7 @@ def buscaUltimaPosicao():
 def distanciaDirecao():
     distDir = buscaUltimaPosicao()
     br = textToSpeech()
-    cursor = conectaBanco().cursor()
+    cursor = conectDatabase().cursor()
     sql = ("SELECT *, (6371 * acos(cos(radians('%s')) * cos(radians(lat)) * cos(radians('%s')- radians(lng)) + "
            "sin(radians('%s')) * sin(radians(lat))))AS distance FROM coordenada HAVING distance <= '%s'")
 

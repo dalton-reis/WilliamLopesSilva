@@ -11,14 +11,14 @@
 # mantida sua fonte e seu autor.
 # Obrigado.
 
-from database import conectaBanco
+from database import conectDatabase
 from tts import textToSpeech
 from actions import buscaUltimaPosicao, distanciaDirecao
 import time
 
 def main():
     try:
-        conecta = conectaBanco()
+        conecta = conectDatabase()
         sinalGPS()
 
         while True:

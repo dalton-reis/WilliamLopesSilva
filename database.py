@@ -3,31 +3,31 @@
 
 # Autor: William Lopes
 # Data: 14/08/2019
-# Linguagem: Python
+# Language: Python
 
-# ========= IMPORTANTE ===========
-# # # O codigo esta livre para usar,
-# # # citar e compartilhar desde que
-# # # mantida sua fonte e seu autor.
-# # # Obrigado.
+# ========= IMPORTANT ===========
+# # # The code is free to use,
+# # # cite and share as long as its
+# # # source and author are maintained.
+# # # Thank you.
 
-# =========== Resumo =============
-# Classe responsavel pela conexao
-# com o banco de dados
+# =========== RESUME =============
+# Class responsible for database
+# connection
 
 import pymysql
 from tts import textToSpeech
 # =========================================================================================================================
-def conectaBanco():
+def conectDatabase():
     HOST = "localhost"
     USER = "root"
     PASSWD = "Wiiu12345*"
-    BANCO = "vision"
+    BASE = "vision"
 
     br = textToSpeech()
     try:
-        conecta = pymysql.connect(HOST, USER, PASSWD)
-        conecta.select_db(BANCO)
+        conect = pymysql.connect(HOST, USER, PASSWD)
+        conect.select_db(BASE)
         print "Banco conectado"
         # br.say("Banco conectado")
         # br.runAndWait()
@@ -36,4 +36,4 @@ def conectaBanco():
         # br.say("Erro O banco especificado nao foi encontrado")
         # br.runAndWait()
 
-    return conecta
+    return conect
