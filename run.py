@@ -13,13 +13,17 @@
 
 from database import conectDatabase
 from tts import textToSpeech
-from actions import buscaUltimaPosicao, distanciaDirecao
+from actions import *
 import time
 
 def main():
     try:
-        conecta = conectDatabase()
-        sinalGPS()
+        # conecta = conectDatabase()
+        # sinalGPS()
+        # pointA = -26.915143, -49.081917
+        # pointB = -26.91534000, -49.08198400
+        # bearing = calculate_initial_compass_bearing(pointA, pointB)
+        # print(bearing)
 
         while True:
             # posicao = buscaUltimaPosicao()
@@ -27,8 +31,8 @@ def main():
             print("teste")
 
 
-    except :
-        print "Ocorreu erro aplicacao inicia em 10 segundos"
+    except:
+        print("Ocorreu erro aplicacao inicia em 10 segundos")
         time.sleep(10)
         main()
 

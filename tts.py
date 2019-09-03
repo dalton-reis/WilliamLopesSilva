@@ -15,10 +15,10 @@
 # Classe responsavel pela conversão
 # de texto para fala
 
-import pyttsx
+import pyttsx3
 
 def textToSpeech():
-    en = pyttsx.init()
+    en = pyttsx3.init()
     en.setProperty('voice', b'brazil')
     en.setProperty('rate', 200)
 
