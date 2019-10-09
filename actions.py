@@ -20,17 +20,18 @@ from tts import textToSpeech
 # import py_qmc5883l
 import math
 
+resultdistanciaDirecao = []
 
 def setDirection(resultBearing):
     if resultBearing > 338 or resultBearing < 22:
         bearing = "a frente"
-    elif resultBearing > 22 and resultBearing < 113:
+    elif resultBearing > 22 and resultBearing < 68:
         bearing = "a frente a direita"
-    elif resultBearing > 113 and resultBearing < 158:
+    elif resultBearing > 68 and resultBearing < 113:
         bearing = "a direita"
-    elif resultBearing > 158 and resultBearing < 203:
+    elif resultBearing > 113 and resultBearing < 158:
         bearing = "atrás a direita"
-    elif resultBearing > 203 and resultBearing < 248:
+    elif resultBearing > 158 and resultBearing < 203:
         bearing = "atrás"
     elif resultBearing > 203 and resultBearing < 248:
         bearing = "atrás a esquerda"
@@ -49,17 +50,19 @@ def buscaUltimaPosicao():
 
 
 def distanciaDirecao():
+    global resultdistanciaDirecao
     currentPosition = gps()
     currentBearing = compass()
+    resut = []
     br = textToSpeech()
     cursor = conectDatabase().cursor()
     sql = ("SELECT *, (6371 * acos(cos(radians('%s')) * cos(radians(lat)) * cos(radians('%s')- radians(lng)) + "
            "sin(radians('%s')) * sin(radians(lat))))AS distance FROM coordenada HAVING distance <= '%s'")
 
     try:
-        cursor.execute(sql, (currentPosition[0], currentPosition[1], currentPosition[0], 0.7))
+        cursor.execute(sql, (currentPosition[0], currentPosition[1], currentPosition[0], 0.2))
         result = cursor.fetchall()
-
+        # print("resultado "+result)
         for data in result:
             lat = float(data[1])
             lng = float(data[2])
@@ -74,19 +77,21 @@ def distanciaDirecao():
                 resultBearing = 360 - auxBearing
 
             bearing = setDirection(resultBearing)
-            br.say(pointInterest + " a " + distanceMeters + " metros " + bearing)
-            br.runAndWait()
-            print("teste")
+            print(pointInterest + " a " + distanceMeters + " metros " + bearing)
+            resultdistanciaDirecao.append(pointInterest + " a " + distanceMeters + " metros " + bearing)
+            # br.say(pointInterest + " a " + distanceMeters + " metros " + bearing)
+            #br.runAndWait()
 
     except:
         br.say("Nenhum ponto de interesse por perto")
         br.runAndWait()
 
+    return resultdistanciaDirecao
 
 def compass():
     # br = textToSpeech()
     # sensor = py_qmc5883l.QMC5883L()
-    # sensor.declination = -19, 31
+    # sensor.declination = -19.31
     #
     # try:
     #     return sensor.get_bearing()
@@ -96,14 +101,14 @@ def compass():
     #     br.say("Erro não foi possivel obter retorno da bussola")
     #     br.runAndWait()
     # TODO mock de dados da direção atual para teste local
-    bearing = 10.0
+    bearing = 120
     return bearing
 
 
 def gps():
     # TODO mock de dados da posição atual para teste ate instalar o chip de GPS
-    lat = -26.915143
-    lng = -49.081917
+    lat = -26.906120
+    lng = -49.078039
     return lat, lng
 
 
@@ -114,3 +119,7 @@ def calculate_initial_compass_bearing(pointA, pointB):
         return math.degrees(angle)
     else:
         return math.degrees((angle + 2 * math.pi))
+
+
+if __name__ == "__main__":
+    distanciaDirecao()

@@ -18,8 +18,15 @@
 import pyttsx3
 
 def textToSpeech():
-    en = pyttsx3.init()
-    en.setProperty('voice', b'brazil')
-    en.setProperty('rate', 200)
+    br = pyttsx3.init()
+    br.setProperty('voice', b'brazil')
+    br.setProperty('rate', 200)
 
-    return en
+    return br
+
+
+def voice(data):
+    br = textToSpeech()
+    br.say(data)
+    br.runAndWait()
+    br.stop()
