@@ -66,9 +66,10 @@ def black_glass():
         pontosInteresses = distanciaDirecao()
         for x in pontosInteresses:
             voice(x)
+            time.sleep(3)
             print("Encontrado " + str(x))
-        print('Working 1')
-        time.sleep(3)
+        print('Proxima verificação em 1 minuto')
+        time.sleep(60)
 
     if not thread_start:
         print("Finalizando black glass")

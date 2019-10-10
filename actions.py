@@ -17,10 +17,18 @@
 
 from database import conectDatabase
 from tts import textToSpeech
-# import py_qmc5883l
 import math
+import sys
+import pynmea2
+import serial
+import time
+import py_qmc5883l
+
+sensor = py_qmc5883l.QMC5883L()
+ser = serial.Serial("/dev/ttyAMA0", 9600, timeout=0.5)
 
 resultdistanciaDirecao = []
+
 
 def setDirection(resultBearing):
     if resultBearing > 338 or resultBearing < 22:
@@ -89,26 +97,22 @@ def distanciaDirecao():
     return resultdistanciaDirecao
 
 def compass():
-    # br = textToSpeech()
-    # sensor = py_qmc5883l.QMC5883L()
-    # sensor.declination = -19.31
-    #
-    # try:
-    #     return sensor.get_bearing()
-    #
-    # except:
-    #     print("Erro: Não foi possivel obter retorno da bussola")
-    #     br.say("Erro não foi possivel obter retorno da bussola")
-    #     br.runAndWait()
-    # TODO mock de dados da direção atual para teste local
-    bearing = 120
+    sensor.declination = -19.31
+    bearing = sensor.get_bearing()
     return bearing
 
 
 def gps():
-    # TODO mock de dados da posição atual para teste ate instalar o chip de GPS
-    lat = -26.906120
-    lng = -49.078039
+    while True:
+        data = ser.readline()
+        if sys.version_info[0] == 3:
+            data = data.decode("utf-8", "ignore")
+        if data[0:6] == '$GNGGA':
+            newmsg = pynmea2.parse(data)
+            lat = round(newmsg.latitude, 6)
+            lng = round(newmsg.longitude, 6)
+            break;
+
     return lat, lng
 
 
