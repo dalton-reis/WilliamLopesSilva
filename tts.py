@@ -14,19 +14,13 @@
 # =========== Resumo =============
 # Classe responsavel pela conversão
 # de texto para fala
-
-import pyttsx3
-
-def textToSpeech():
-    br = pyttsx3.init()
-    br.setProperty('voice', b'brazil')
-    br.setProperty('rate', 200)
-
-    return br
+from gtts import gTTS
+import re
 
 
-def voice(data):
-    br = textToSpeech()
-    br.say(data)
-    br.runAndWait()
-    br.stop()
+def save_audio_tts(id, ponto_interesse):
+    tts = gTTS(text=ponto_interesse, lang='pt-br')
+    # Replace all runs of whitespace with a single dash
+    ponto_interesse = re.sub(r"\s+", '_', ponto_interesse)
+    # Save the audio file
+    tts.save('/Users/william.silva/Desktop/Furb/TCC/gttsAudios/' + str(id) + '_' + ponto_interesse + '.mp3')

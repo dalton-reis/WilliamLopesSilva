@@ -14,18 +14,19 @@
 # =========== Resumo =============
 # Classe responsavel pelas ações
 # do sistema
+import pymysql
 
 from database import conectDatabase
-from tts import textToSpeech
 import math
 import sys
-import pynmea2
-import serial
-import time
-import py_qmc5883l
 
-sensor = py_qmc5883l.QMC5883L()
-ser = serial.Serial("/dev/ttyAMA0", 9600, timeout=0.5)
+# import pynmea2
+# import serial
+# import time
+# import py_qmc5883l
+#
+# sensor = py_qmc5883l.QMC5883L()
+# ser = serial.Serial("/dev/ttyAMA0", 9600, timeout=0.5)
 
 resultdistanciaDirecao = []
 
@@ -49,28 +50,18 @@ def setDirection(resultBearing):
         bearing = "a frente a esquerda"
     return bearing
 
-def buscaUltimaPosicao():
-    cursor = conectDatabase().cursor()
-    cursor.execute("SELECT * FROM posicao_atual ORDER BY id DESC LIMIT 1")
-    resultado = cursor.fetchone()
-    cursor.close()
-    return resultado
-
-
 def distanciaDirecao():
     global resultdistanciaDirecao
     currentPosition = gps()
     currentBearing = compass()
     resut = []
-    br = textToSpeech()
     cursor = conectDatabase().cursor()
     sql = ("SELECT *, (6371 * acos(cos(radians('%s')) * cos(radians(lat)) * cos(radians('%s')- radians(lng)) + "
-           "sin(radians('%s')) * sin(radians(lat))))AS distance FROM coordenada HAVING distance <= '%s'")
+           "sin(radians('%s')) * sin(radians(lat))))AS distance FROM ponto_interesse HAVING distance <= '%s'")
 
     try:
         cursor.execute(sql, (currentPosition[0], currentPosition[1], currentPosition[0], 0.2))
         result = cursor.fetchall()
-        # print("resultado "+result)
         for data in result:
             lat = float(data[1])
             lng = float(data[2])
@@ -87,34 +78,31 @@ def distanciaDirecao():
             bearing = setDirection(resultBearing)
             print(pointInterest + " a " + distanceMeters + " metros " + bearing)
             resultdistanciaDirecao.append(pointInterest + " a " + distanceMeters + " metros " + bearing)
-            # br.say(pointInterest + " a " + distanceMeters + " metros " + bearing)
-            #br.runAndWait()
 
     except:
-        br.say("Nenhum ponto de interesse por perto")
-        br.runAndWait()
+        print("Nenhum ponto de interesse por perto")
 
     return resultdistanciaDirecao
 
 def compass():
-    sensor.declination = -19.31
-    bearing = sensor.get_bearing()
+    # sensor.declination = -19.31
+    # bearing = sensor.get_bearing()
+    bearing = 120
     return bearing
 
-
 def gps():
-    while True:
-        data = ser.readline()
-        if sys.version_info[0] == 3:
-            data = data.decode("utf-8", "ignore")
-        if data[0:6] == '$GNGGA':
-            newmsg = pynmea2.parse(data)
-            lat = round(newmsg.latitude, 6)
-            lng = round(newmsg.longitude, 6)
-            break;
-
+    # while True:
+    #     data = ser.readline()
+    #     if sys.version_info[0] == 3:
+    #         data = data.decode("utf-8", "ignore")
+    #     if data[0:6] == '$GNGGA':
+    #         newmsg = pynmea2.parse(data)
+    #         lat = round(newmsg.latitude, 6)
+    #         lng = round(newmsg.longitude, 6)
+    #         break;
+    lat = -26.906120
+    lng = -49.078039
     return lat, lng
-
 
 def calculate_initial_compass_bearing(pointA, pointB):
     startx, starty, endx, endy = pointA[0], pointA[1], pointB[0], pointB[1]
@@ -123,7 +111,3 @@ def calculate_initial_compass_bearing(pointA, pointB):
         return math.degrees(angle)
     else:
         return math.degrees((angle + 2 * math.pi))
-
-
-if __name__ == "__main__":
-    distanciaDirecao()

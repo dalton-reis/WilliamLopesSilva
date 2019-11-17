@@ -1,0 +1,11 @@
+#JSGF V1.0;
+
+/**
+ * JSGF Grammar for English
+ */
+
+grammar counting;
+
+public <counting> = ( <say> ) +;
+
+<say> = start | stop | offline ;
