@@ -29,29 +29,30 @@ import sys
 # ser = serial.Serial("/dev/ttyAMA0", 9600, timeout=0.5)
 
 resultdistanciaDirecao = []
+points_result = []
 
 
 def setDirection(resultBearing):
     if resultBearing > 338 or resultBearing < 22:
-        bearing = "a frente"
+        bearing = "a_frente"
     elif resultBearing > 22 and resultBearing < 68:
-        bearing = "a frente a direita"
+        bearing = "a_frente_a_direita"
     elif resultBearing > 68 and resultBearing < 113:
-        bearing = "a direita"
+        bearing = "a_direita"
     elif resultBearing > 113 and resultBearing < 158:
-        bearing = "atrás a direita"
+        bearing = "atras_a_direita"
     elif resultBearing > 158 and resultBearing < 203:
-        bearing = "atrás"
+        bearing = "atras"
     elif resultBearing > 203 and resultBearing < 248:
-        bearing = "atrás a esquerda"
+        bearing = "atras_a_esquerda"
     elif resultBearing > 248 and resultBearing < 293:
-        bearing = "a esquerda"
+        bearing = "a_esquerda"
     elif resultBearing > 293 and resultBearing < 338:
-        bearing = "a frente a esquerda"
+        bearing = "a_frente_a_esquerda"
     return bearing
 
 def distanciaDirecao():
-    global resultdistanciaDirecao
+    global resultdistanciaDirecao, points_result
     currentPosition = gps()
     currentBearing = compass()
     resut = []
@@ -60,12 +61,13 @@ def distanciaDirecao():
            "sin(radians('%s')) * sin(radians(lat))))AS distance FROM ponto_interesse HAVING distance <= '%s'")
 
     try:
-        cursor.execute(sql, (currentPosition[0], currentPosition[1], currentPosition[0], 0.2))
+        cursor.execute(sql, (currentPosition[0], currentPosition[1], currentPosition[0], 0.05))
         result = cursor.fetchall()
         for data in result:
+            id = int(data[0])
             lat = float(data[1])
             lng = float(data[2])
-            pointInterest = data[3]
+            pointInterest = str(id) + "_" + data[3]
             distanceMeters = str(int(round(data[4], 4) * 1000))
             destinationPosition = lat, lng
             finishBearingPosition = calculate_initial_compass_bearing(currentPosition, destinationPosition)
@@ -76,8 +78,11 @@ def distanciaDirecao():
                 resultBearing = 360 - auxBearing
 
             bearing = setDirection(resultBearing)
-            print(pointInterest + " a " + distanceMeters + " metros " + bearing)
-            resultdistanciaDirecao.append(pointInterest + " a " + distanceMeters + " metros " + bearing)
+            points_result.append(pointInterest)
+            points_result.append(distanceMeters)
+            points_result.append(bearing)
+            resultdistanciaDirecao.append(points_result)
+            points_result = []
 
     except:
         print("Nenhum ponto de interesse por perto")
@@ -100,8 +105,8 @@ def gps():
     #         lat = round(newmsg.latitude, 6)
     #         lng = round(newmsg.longitude, 6)
     #         break;
-    lat = -26.906120
-    lng = -49.078039
+    lat = -26.907058
+    lng = -49.079089
     return lat, lng
 
 def calculate_initial_compass_bearing(pointA, pointB):
