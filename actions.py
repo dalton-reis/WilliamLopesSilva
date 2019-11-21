@@ -90,23 +90,23 @@ def distanciaDirecao():
     return resultdistanciaDirecao
 
 def compass():
-    # sensor.declination = -19.31
-    # bearing = sensor.get_bearing()
-    bearing = 120
+    sensor.declination = -19.31
+    bearing = sensor.get_bearing()
+    # bearing = 120
     return bearing
 
 def gps():
-    # while True:
-    #     data = ser.readline()
-    #     if sys.version_info[0] == 3:
-    #         data = data.decode("utf-8", "ignore")
-    #     if data[0:6] == '$GNGGA':
-    #         newmsg = pynmea2.parse(data)
-    #         lat = round(newmsg.latitude, 6)
-    #         lng = round(newmsg.longitude, 6)
-    #         break;
-    lat = -26.907058
-    lng = -49.079089
+    while True:
+        data = ser.readline()
+        if sys.version_info[0] == 3:
+            data = data.decode("utf-8", "ignore")
+        if data[0:6] == '$GNGGA':
+            newmsg = pynmea2.parse(data)
+            lat = round(newmsg.latitude, 6)
+            lng = round(newmsg.longitude, 6)
+            break;
+    # lat = -26.907058
+    # lng = -49.079089
     return lat, lng
 
 def calculate_initial_compass_bearing(pointA, pointB):
@@ -116,3 +116,8 @@ def calculate_initial_compass_bearing(pointA, pointB):
         return math.degrees(angle)
     else:
         return math.degrees((angle + 2 * math.pi))
+
+
+if __name__ == "__main__":
+    top = distanciaDirecao()
+    print(top)

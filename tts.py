@@ -30,24 +30,22 @@ def save_audio_tts(id, ponto_interesse):
 
 def play_audio_tts(file):
     if type(file) is str:
+        print(file)
         instance = vlc.Instance('--aout=alsa')
         p = instance.media_player_new()
         m = instance.media_new('/home/pi/Desktop/TCC/TCC-Furb/audios/' + file + '.mp3')
         p.set_media(m)
         p.play()
-        # p.pause()
         vlc.libvlc_audio_set_volume(p, 80)
         time.sleep(song_length(file))
     else:
         for i in file:
             for j in i:
-                print(j)
                 instance = vlc.Instance('--aout=alsa')
                 p = instance.media_player_new()
                 m = instance.media_new('/home/pi/Desktop/TCC/TCC-Furb/audios/' + j + '.mp3')
                 p.set_media(m)
                 p.play()
-                # p.pause()
                 vlc.libvlc_audio_set_volume(p, 80)
                 time.sleep(song_length(j))
 
