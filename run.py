@@ -51,7 +51,7 @@ def task_speech():
     print("Thread: Microfone")
     microfone = sr.Recognizer()
 
-    while task_main:
+    while task_main.value:
         if not tts_on.value:
             with sr.Microphone() as source:
                 microfone.adjust_for_ambient_noise(source)
