@@ -10,7 +10,7 @@ Universidade Regional de Blumenau (FURB) – Blumenau, SC – Brasil
 Installation guide for the tools used in this project.
 
 File for printing the 3D case in [arquivos_case](arquivos_case/)
-![Image of wiiulopes](https://github.com/wiiulopes/TCC-Furb/blob/master/arquivos_case/Case_3d.png)
+![Image of wiiulopes](arquivos_case/Case_3d.png)
 
 ## Install CMUSphinx/Pocketsphinx 
 
