@@ -8,4 +8,4 @@ grammar counting;
 
 public <counting> = ( <say> ) +;
 
-<say> = start | stop | offline ;
+<say> = lets go | stop | offline ;

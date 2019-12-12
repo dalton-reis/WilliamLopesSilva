@@ -14,7 +14,7 @@
 import speech_recognition as sr
 import multiprocessing, ctypes
 import time
-from actions import distanciaDirecao
+from actions import distanciaDirecao, status_gps_compass
 from database import statusDatabase
 from new_points import read_file
 from tts import play_audio_tts
@@ -24,20 +24,24 @@ task_black = multiprocessing.Value(ctypes.c_bool, False)  # (type, init value)
 task_main = multiprocessing.Value(ctypes.c_bool, True)  # (type, init value)
 tts_on = multiprocessing.Value(ctypes.c_bool, False)  # (type, init value)
 lock = multiprocessing.Manager().Lock()
-keywords = [("start", 1), ("stop", 1), ("offline", 1), ]
+keywords = [("lets go", 1), ("stop", 1), ("offline", 1), ]
 
 
 def validation_task():
-    validation = True
-    while validation:
+    validation_db = True
+    validation_gps_compass = True
+    while validation_db or validation_gps_compass:
         if statusDatabase():
             print("Banco de dados conectado")
-            validation = False
+            validation_db = False
+        if status_gps_compass():
+            print("GPS e Bussola conectados")
+            validation_gps_compass = False
         else:
-            print("Banco de dados desconectado, proxima tentativa em 10 segundos")
+            print("Banco de dados ou GPS/Bussola desconectado, proxima tentativa em 10 segundos")
             time.sleep(10)
 
-    if not validation and have_internet():
+    if not validation_db and have_internet():
         read_file()
     t1 = multiprocessing.Process(target=task_speech)
     t2 = multiprocessing.Process(target=task_black_glasses)
@@ -62,7 +66,7 @@ def task_speech():
                 frase = microfone.recognize_sphinx(audio, keyword_entries=keywords, grammar='Grammar.jsgf')
                 print("Voce disse:", frase)
                 # Após alguns segundos, retorna a frase falada
-                if "start" in frase:
+                if "lets go" in frase:
                     play_audio_tts("start_black")
                     with lock:
                         task_black.value = True
@@ -72,7 +76,6 @@ def task_speech():
                     play_audio_tts("stop_black")
                     with lock:
                         task_black.value = False
-                        tts_on.value = False
                     print("Recebido o comando para parar a Aplicação: ", frase)
                 elif "offline" in frase:
                     play_audio_tts("offline")
@@ -84,17 +87,22 @@ def task_speech():
                     print("O comando " + frase + " não é valido")
             except sr.UnknownValueError:
                 print("Não entendi favor repetir")
-
+        else:
+            teste = 1
 
 def task_black_glasses():
     global task_main, task_black, tts_on
+    pontosInteresses = []
     print("Executando black glasses")
     while task_main.value:
         if task_black.value:
             with lock:
                 tts_on.value = True
             pontosInteresses = distanciaDirecao()
+            print("o que tem no pontoInteresse", pontosInteresses)
             play_audio_tts(pontosInteresses)
+            pontosInteresses = []
+            print("o que tem no pontoInteresse agora", pontosInteresses)
             with lock:
                 tts_on.value = False
             time.sleep(30)

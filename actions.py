@@ -20,13 +20,14 @@ from database import conectDatabase
 import math
 import sys
 
-# import pynmea2
-# import serial
-# import time
-# import py_qmc5883l
+import pynmea2
+import serial
+import time
+import py_qmc5883l
+
 #
-# sensor = py_qmc5883l.QMC5883L()
-# ser = serial.Serial("/dev/ttyAMA0", 9600, timeout=0.5)
+sensor = py_qmc5883l.QMC5883L()
+ser = serial.Serial("/dev/ttyUSB0", 9600, timeout=0.5)
 
 resultdistanciaDirecao = []
 points_result = []
@@ -53,6 +54,7 @@ def setDirection(resultBearing):
 
 def distanciaDirecao():
     global resultdistanciaDirecao, points_result
+    resultdistanciaDirecao = []
     currentPosition = gps()
     currentBearing = compass()
     resut = []
@@ -68,7 +70,7 @@ def distanciaDirecao():
             lat = float(data[1])
             lng = float(data[2])
             pointInterest = str(id) + "_" + data[3]
-            distanceMeters = str(int(round(data[4], 4) * 1000))
+            distanceMeters = str(int(round(data[4], 4) * 1000)) + "_" + str("metros")
             destinationPosition = lat, lng
             finishBearingPosition = calculate_initial_compass_bearing(currentPosition, destinationPosition)
             if currentBearing < finishBearingPosition:
@@ -90,24 +92,38 @@ def distanciaDirecao():
     return resultdistanciaDirecao
 
 def compass():
-    sensor.declination = -19.31
-    bearing = sensor.get_bearing()
+    # sensor.declination = -19.31
+    # bearing = sensor.get_bearing()
+    # bearing = 145 #shopping
+    bearing = 110  # furb caixa dgua
     # bearing = 120
     return bearing
 
 def gps():
-    while True:
-        data = ser.readline()
-        if sys.version_info[0] == 3:
-            data = data.decode("utf-8", "ignore")
-        if data[0:6] == '$GNGGA':
-            newmsg = pynmea2.parse(data)
-            lat = round(newmsg.latitude, 6)
-            lng = round(newmsg.longitude, 6)
-            break;
+    # while True:
+    #    data = ser.readline()
+    #    if sys.version_info[0] == 3:
+    #        data = data.decode("utf-8", "ignore")
+    #    if data[0:6] == '$GNGGA':
+    #        newmsg = pynmea2.parse(data)
+    #        lat = round(newmsg.latitude, 6)
+    #        lng = round(newmsg.longitude, 6)
+    #        break;
     # lat = -26.907058
     # lng = -49.079089
+    # lat = -26.919343#shopping
+    # lng = -49.069266#shopping
+    lat = -26.905754  # furb caixa dgua
+    lng = -49.079427  #furb caixa dgua
     return lat, lng
+
+
+def status_gps_compass():
+    compass_data = compass()
+    gps_data = gps()
+    if compass_data and gps_data:
+        return True
+    return False
 
 def calculate_initial_compass_bearing(pointA, pointB):
     startx, starty, endx, endy = pointA[0], pointA[1], pointB[0], pointB[1]
@@ -117,7 +133,5 @@ def calculate_initial_compass_bearing(pointA, pointB):
     else:
         return math.degrees((angle + 2 * math.pi))
 
-
-if __name__ == "__main__":
-    top = distanciaDirecao()
-    print(top)
+# if __name__ == "__main__":
+#     status_gps_compass()
